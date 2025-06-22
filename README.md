@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Helix: Agentic RAG Test Automation Platform
 
 ## Patent-Pending 10-Layer Element Identification System
@@ -78,3 +79,7 @@ The Universal Locator Algorithm orchestrates all 7 layers to find elements:
 ## License
 
 Proprietary - Patent Pending
+=======
+# helix
+HELIX: Hierarchical Element Location Intelligence eXpert - A 10-layer dynamic element identification system for cross-platform test automation
+>>>>>>> db5b4880fedd8d10c0144138896abfd421d9100e
