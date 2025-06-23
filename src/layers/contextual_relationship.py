@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from playwright.async_api import Page, ElementHandle
 
 from ..models.element import ElementStrategy, ElementContext, StrategyType
+from .base import BaseLayer
 
 
 @dataclass
@@ -26,13 +27,16 @@ class RelationshipContext:
     relative_position: Optional[str] = None  # above, below, left-of, right-of
 
 
-class ContextualRelationshipLayer:
+class ContextualRelationshipLayer(BaseLayer):
     """
     Layer 2: Contextual Relationship Mapping
     
     Finds elements based on their relationships to other elements.
     Handles parent-child, sibling, and proximity relationships.
     """
+    
+    def __init__(self):
+        super().__init__(StrategyType.CONTEXTUAL_RELATIONSHIP)
     
     async def generate_strategies(
         self, 

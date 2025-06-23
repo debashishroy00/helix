@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from playwright.async_api import Page, ElementHandle
 
 from ..models.element import ElementStrategy, ElementContext, StrategyType
+from .base import BaseLayer
 
 
 @dataclass
@@ -25,7 +26,7 @@ class BehaviorPattern:
     confidence: float
 
 
-class BehavioralPatternLayer:
+class BehavioralPatternLayer(BaseLayer):
     """
     Layer 4: Behavioral Pattern Recognition
     
@@ -35,6 +36,9 @@ class BehavioralPatternLayer:
     - Focus indicators (outlines, backgrounds)
     - Animation patterns (transitions, transforms)
     """
+    
+    def __init__(self):
+        super().__init__(StrategyType.BEHAVIORAL_PATTERN)
     
     async def generate_strategies(
         self, 

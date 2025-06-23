@@ -37,6 +37,18 @@ class SemanticIntentLayer(BaseLayer):
         super().__init__(StrategyType.SEMANTIC_INTENT)
         self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         
+        # Model selection based on complexity
+        self.use_fast_model = os.getenv("USE_GPT_35_TURBO", "true").lower() == "true"
+        self.fast_model = "gpt-3.5-turbo-1106"  # 10x faster, cheaper
+        self.accurate_model = "gpt-4-turbo-preview"  # More accurate
+        
+        # Patterns that require GPT-4's advanced reasoning
+        self.complex_patterns = [
+            "complex", "nested", "multiple", "conditional",
+            "dynamic", "context-aware", "state-dependent",
+            "workflow", "multi-step", "advanced"
+        ]
+        
         # Platform-specific patterns learned over time
         self.platform_hints = {
             "salesforce_lightning": {
@@ -67,11 +79,14 @@ class SemanticIntentLayer(BaseLayer):
         prompt = self._build_prompt(context)
         
         try:
-            # Call GPT-4 for semantic understanding
+            # Select model based on complexity and user preference
+            model = self._select_model(context)
+            
+            # Call GPT for semantic understanding
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=model,
                 messages=[
-                    {"role": "system", "content": self._get_system_prompt()},
+                    {"role": "system", "content": self._get_system_prompt(model)},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,  # Lower temperature for more consistent results
@@ -119,12 +134,23 @@ REASON: <why this might work>
 
 Focus on selectors that would remain stable even if IDs/classes change."""
     
-    def _get_system_prompt(self) -> str:
-        """System prompt to guide GPT-4's behavior."""
-        return """You are an expert at identifying UI elements across different platforms.
+    def _get_system_prompt(self, model: str) -> str:
+        """System prompt to guide GPT behavior based on model capability."""
+        base_prompt = """You are an expert at identifying UI elements across different platforms.
 You understand how different frameworks (Salesforce Lightning, SAP UI5, etc.) structure their DOM.
 Generate multiple strategies for finding elements, focusing on semantic meaning over brittle selectors.
 Always prefer selectors that understand WHAT the element does rather than HOW it's styled."""
+        
+        # Adjust complexity based on model
+        if "gpt-4" in model:
+            return base_prompt + """
+Use advanced reasoning to understand complex element relationships and state-dependent selectors.
+Consider user permissions, workflow states, and dynamic content."""
+        else:
+            # GPT-3.5-turbo - keep it simple and fast
+            return base_prompt + """
+Focus on simple, reliable patterns. Prefer common HTML attributes and standard CSS selectors.
+Avoid overly complex logic - prioritize speed and common patterns."""
     
     def _parse_gpt_response(self, content: str, context: ElementContext) -> List[ElementStrategy]:
         """Parse GPT-4's response into strategy objects."""
@@ -273,3 +299,30 @@ Always prefer selectors that understand WHAT the element does rather than HOW it
                 break
         
         return strategies
+    
+    def _select_model(self, context: ElementContext) -> str:
+        """
+        Select the appropriate GPT model based on complexity and preferences.
+        
+        GPT-3.5-turbo: 10x faster, 10x cheaper, good for simple patterns
+        GPT-4: More accurate for complex patterns
+        """
+        # Always use fast model if configured
+        if not self.use_fast_model:
+            return self.accurate_model
+        
+        # Check if intent indicates complexity requiring GPT-4
+        intent_lower = context.intent.lower()
+        
+        # Use GPT-4 for complex patterns
+        if any(pattern in intent_lower for pattern in self.complex_patterns):
+            print(f"Using GPT-4 for complex pattern: {context.intent}")
+            return self.accurate_model
+        
+        # Use GPT-4 for complex platforms with unusual patterns
+        if context.platform.value in ["workday", "oracle_cloud"] and len(intent_lower.split()) > 5:
+            return self.accurate_model
+        
+        # Default to fast model for simple patterns
+        print(f"Using GPT-3.5-turbo for simple pattern: {context.intent}")
+        return self.fast_model
