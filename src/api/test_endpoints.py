@@ -11,6 +11,8 @@ import asyncio
 
 from src.models.element import ElementContext, Platform, StrategyType
 from src.layers.semantic_intent import SemanticIntentLayer
+from src.layers.contextual_relationship import ContextualRelationshipLayer
+from src.layers.behavioral_pattern import BehavioralPatternLayer
 
 router = APIRouter(prefix="/test", tags=["testing"])
 
@@ -68,6 +70,110 @@ async def test_semantic_layer(request: Dict[str, Any]):
         }
 
 
+@router.post("/contextual_layer")
+async def test_contextual_layer(request: Dict[str, Any]):
+    """
+    Test Layer 2: Contextual Relationship Mapping.
+    """
+    try:
+        # Create contextual layer
+        layer = ContextualRelationshipLayer()
+        
+        # Create context
+        context = ElementContext(
+            platform=Platform(request.get("platform", "salesforce_lightning")),
+            page_type=request.get("page_type", "form"),
+            intent=request.get("intent", "email field next to phone number"),
+            additional_context=request.get("additional_context", {})
+        )
+        
+        # Mock page object
+        class MockPage:
+            def __init__(self):
+                pass
+        
+        mock_page = MockPage()
+        
+        # Generate strategies
+        strategies = await layer.generate_strategies(mock_page, context)
+        
+        # Build response
+        response = {
+            "success": True,
+            "layer": "contextual_relationship",
+            "strategies_count": len(strategies),
+            "strategies": [
+                {
+                    "selector": s.selector,
+                    "confidence": s.confidence,
+                    "metadata": s.metadata
+                }
+                for s in strategies
+            ]
+        }
+        
+        return response
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "layer": "contextual_relationship"
+        }
+
+
+@router.post("/behavioral_layer")
+async def test_behavioral_layer(request: Dict[str, Any]):
+    """
+    Test Layer 4: Behavioral Pattern Recognition.
+    """
+    try:
+        # Create behavioral layer
+        layer = BehavioralPatternLayer()
+        
+        # Create context
+        context = ElementContext(
+            platform=Platform(request.get("platform", "salesforce_lightning")),
+            page_type=request.get("page_type", "form"),
+            intent=request.get("intent", "save button with hover effect"),
+            additional_context=request.get("additional_context", {})
+        )
+        
+        # Mock page object
+        class MockPage:
+            def __init__(self):
+                pass
+        
+        mock_page = MockPage()
+        
+        # Generate strategies
+        strategies = await layer.generate_strategies(mock_page, context)
+        
+        # Build response
+        response = {
+            "success": True,
+            "layer": "behavioral_pattern",
+            "strategies_count": len(strategies),
+            "strategies": [
+                {
+                    "selector": s.selector,
+                    "confidence": s.confidence,
+                    "metadata": s.metadata
+                }
+                for s in strategies
+            ]
+        }
+        
+        return response
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "layer": "behavioral_pattern"
+        }
+
+
 @router.post("/layer_strategies")
 async def test_layer_strategies(request: Dict[str, Any]):
     """
@@ -111,9 +217,54 @@ async def test_layer_strategies(request: Dict[str, Any]):
             "reason": "Requires browser automation (Playwright)"
         }
         
+        # Test contextual relationship layer
+        try:
+            contextual_layer = ContextualRelationshipLayer()
+            contextual_strategies = await contextual_layer.generate_strategies(mock_page, context)
+            
+            results["contextual_relationship"] = {
+                "available": True,
+                "strategies_count": len(contextual_strategies),
+                "sample_strategies": [
+                    {
+                        "selector": s.selector,
+                        "confidence": s.confidence,
+                        "metadata": s.metadata
+                    }
+                    for s in contextual_strategies[:3]
+                ]
+            }
+        except Exception as e:
+            results["contextual_relationship"] = {
+                "available": False,
+                "reason": f"Error: {str(e)}"
+            }
+        
+        # Test behavioral pattern layer
+        try:
+            behavioral_layer = BehavioralPatternLayer()
+            behavioral_strategies = await behavioral_layer.generate_strategies(mock_page, context)
+            
+            results["behavioral_pattern"] = {
+                "available": True,
+                "strategies_count": len(behavioral_strategies),
+                "sample_strategies": [
+                    {
+                        "selector": s.selector,
+                        "confidence": s.confidence,
+                        "metadata": s.metadata
+                    }
+                    for s in behavioral_strategies[:3]
+                ]
+            }
+        except Exception as e:
+            results["behavioral_pattern"] = {
+                "available": False,
+                "reason": f"Error: {str(e)}"
+            }
+        
         # Other layers (not yet implemented)
-        for layer_name in ["contextual_relationship", "behavioral_pattern", 
-                          "structural_pattern", "accessibility_bridge", "ml_fusion"]:
+        for layer_name in ["structural_pattern", "accessibility_bridge", "ml_fusion"]:
             results[layer_name] = {
                 "available": False,
                 "reason": "Not yet implemented"

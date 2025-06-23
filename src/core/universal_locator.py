@@ -32,9 +32,9 @@ from src.models.element import (
 from src.layers.base import BaseLayer, AsyncLayerExecutor
 from src.layers.semantic_intent import SemanticIntentLayer
 from src.layers.visual_fingerprint import VisualFingerprintLayer
+from src.layers.contextual_relationship import ContextualRelationshipLayer
+from src.layers.behavioral_pattern import BehavioralPatternLayer
 # Placeholder imports for layers we'll implement later
-# from src.layers.contextual_relationship import ContextualRelationshipLayer
-# from src.layers.behavioral_pattern import BehavioralPatternLayer
 # from src.layers.structural_pattern import StructuralPatternLayer
 # from src.layers.accessibility_bridge import AccessibilityBridgeLayer
 # from src.layers.ml_fusion import MLFusionLayer
@@ -82,14 +82,14 @@ class UniversalLocator:
         # Layer 1: Semantic Intent Recognition
         layers[StrategyType.SEMANTIC_INTENT] = SemanticIntentLayer()
         
-        # Layer 2: Contextual Relationship Mapping (placeholder)
-        # layers[StrategyType.CONTEXTUAL_RELATIONSHIP] = ContextualRelationshipLayer()
+        # Layer 2: Contextual Relationship Mapping
+        layers[StrategyType.CONTEXTUAL_RELATIONSHIP] = ContextualRelationshipLayer()
         
         # Layer 3: Visual Fingerprinting
         layers[StrategyType.VISUAL_FINGERPRINT] = VisualFingerprintLayer()
         
-        # Layer 4: Behavioral Pattern Recognition (placeholder)
-        # layers[StrategyType.BEHAVIORAL_PATTERN] = BehavioralPatternLayer()
+        # Layer 4: Behavioral Pattern Recognition
+        layers[StrategyType.BEHAVIORAL_PATTERN] = BehavioralPatternLayer()
         
         # Layer 5: Structural Pattern Analysis (placeholder)
         # layers[StrategyType.STRUCTURAL_PATTERN] = StructuralPatternLayer()
