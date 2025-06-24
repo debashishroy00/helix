@@ -244,16 +244,16 @@ async def find_element_smart(request: ElementRequest):
         # Get layers
         locator = get_universal_locator()
         
-        # Use smart orchestrator
-        from src.core.smart_orchestrator import SmartOrchestrator
-        orchestrator = SmartOrchestrator()
+        # Use optimized universal orchestrator
+        from src.core.smart_orchestrator import HighPerformanceUniversalOrchestrator
+        orchestrator = HighPerformanceUniversalOrchestrator()
         
-        strategies, execution_path = await orchestrator.find_element_smart(
+        strategies = await orchestrator.orchestrate_element_finding(
             locator.layers,
             None,  # No browser for fast mode
-            context,
-            max_time_ms=5000
+            context
         )
+        execution_path = ["optimized_universal"]
         
         elapsed_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
         
@@ -261,7 +261,7 @@ async def find_element_smart(request: ElementRequest):
             best_strategy = strategies[0]
             
             # Get performance stats
-            perf_stats = orchestrator.get_performance_stats(execution_path, elapsed_ms)
+            perf_stats = orchestrator.get_performance_summary()
             
             return ElementResponse(
                 found=True,

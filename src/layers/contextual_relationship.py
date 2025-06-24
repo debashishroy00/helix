@@ -49,6 +49,10 @@ class ContextualRelationshipLayer(BaseLayer):
         # Platform-specific relationship patterns
         relationship_patterns = self._get_platform_patterns(context.platform)
         
+        # Check for login page specific patterns first
+        if context.page_type == "login_page":
+            strategies.extend(await self._login_form_strategies(context, relationship_patterns))
+        
         # Generate strategies based on different relationship types
         strategies.extend(await self._parent_child_strategies(context, relationship_patterns))
         strategies.extend(await self._sibling_strategies(context, relationship_patterns))
@@ -99,8 +103,68 @@ class ContextualRelationshipLayer(BaseLayer):
             "label_input_relation": "//label[contains(text(), '{label}')]/following::input[1]",
             "button_in_section": "//section[.//h2[contains(text(), '{section}')]]//button[contains(text(), '{button}')]",
             "field_container": "div.form-group, div.field, fieldset",
-            "action_bar": "div.actions, div.button-group, footer"
+            "action_bar": "div.actions, div.button-group, footer",
+            # Login form patterns - ordered by specificity
+            "login_username": ["#username", "input[name='username']", "input[type='email']", "input[id*='user']", "input[placeholder*='username' i]"],
+            "login_password": ["#password", "input[name='password']", "input[type='password']", "input[id*='pass']"],
+            "login_button": ["#Login", "input[value*='Log' i]", "input[type='submit']", "button[type='submit']", ".loginButton", "button:has-text('Log')"]
         }
+    
+    async def _login_form_strategies(
+        self,
+        context: ElementContext,
+        patterns: Dict[str, Any]
+    ) -> List[ElementStrategy]:
+        """Generate high-confidence strategies for login form elements."""
+        strategies = []
+        intent_lower = context.intent.lower()
+        
+        # Username field patterns
+        if any(word in intent_lower for word in ['username', 'user', 'email', 'login']):
+            for selector in patterns.get("login_username", []):
+                strategies.append(ElementStrategy(
+                    strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
+                    selector=selector,
+                    confidence=0.99,  # Maximum confidence for deterministic login patterns
+                    metadata={
+                        "relationship_type": "login_form",
+                        "field_type": "username",
+                        "pattern": selector,
+                        "source": "deterministic_login_pattern"
+                    }
+                ))
+        
+        # Password field patterns
+        if 'password' in intent_lower:
+            for selector in patterns.get("login_password", []):
+                strategies.append(ElementStrategy(
+                    strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
+                    selector=selector,
+                    confidence=0.99,
+                    metadata={
+                        "relationship_type": "login_form",
+                        "field_type": "password",
+                        "pattern": selector,
+                        "source": "deterministic_login_pattern"
+                    }
+                ))
+        
+        # Login button patterns - be more specific about what qualifies as login button intent
+        if any(word in intent_lower for word in ['login button', 'sign in button', 'submit', 'log in']):
+            for selector in patterns.get("login_button", []):
+                strategies.append(ElementStrategy(
+                    strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
+                    selector=selector,
+                    confidence=0.99,
+                    metadata={
+                        "relationship_type": "login_form",
+                        "field_type": "button",
+                        "pattern": selector,
+                        "source": "deterministic_login_pattern"
+                    }
+                ))
+        
+        return strategies
     
     async def _parent_child_strategies(
         self, 

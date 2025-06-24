@@ -1,0 +1,176 @@
+{
+  "browser_settings": {
+    "headless": false,
+    "timeout": 30000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "apps": {
+    "salesforce": {
+      "login_url": "https://login.salesforce.com",
+      "app_name": "Salesforce",
+      "credentials": {
+        "username": "",
+        "password": "",
+        "org_url": "",
+        "security_token": ""
+      },
+      "selectors": {
+        "username": [
+          "#username",
+          "input[name='username']",
+          "input[type='email']"
+        ],
+        "password": [
+          "#password",
+          "input[name='password']",
+          "input[type='password']"
+        ],
+        "login_button": [
+          "#Login",
+          "input[type='submit']",
+          "button[type='submit']"
+        ],
+        "domain_field": [
+          "input[name='domain']",
+          "input[id='domain']"
+        ],
+        "mfa_code": [
+          "#mfa",
+          "input[name='code']",
+          "input[placeholder*='code' i]"
+        ],
+        "success_indicators": [
+          ".slds-global-header",
+          ".oneHeader",
+          "lightning-",
+          "[data-aura-class]"
+        ]
+      }
+    },
+    "sap": {
+      "login_url": "",
+      "app_name": "SAP",
+      "credentials": {
+        "username": "",
+        "password": "",
+        "client": ""
+      },
+      "selectors": {
+        "username": [
+          "#j_username",
+          "input[name='j_username']",
+          "[id*='username']"
+        ],
+        "password": [
+          "#j_password",
+          "input[name='j_password']",
+          "[id*='password']"
+        ],
+        "login_button": [
+          "#logOnFormSubmit",
+          "button[type='submit']",
+          "[value*='Log' i]"
+        ],
+        "client_field": [
+          "#j_client",
+          "input[name='client']"
+        ],
+        "mfa_code": [
+          "input[name='otpCode']",
+          "input[placeholder*='code' i]"
+        ],
+        "success_indicators": [
+          ".sapUiShell",
+          ".sapMShell",
+          "#shell-hdr"
+        ]
+      }
+    },
+    "oracle": {
+      "login_url": "",
+      "app_name": "Oracle Cloud",
+      "credentials": {
+        "username": "",
+        "password": "",
+        "identity_domain": ""
+      },
+      "selectors": {
+        "username": [
+          "input[name='userid']",
+          "input[name='username']",
+          "#userid"
+        ],
+        "password": [
+          "input[name='password']",
+          "#password"
+        ],
+        "login_button": [
+          "button[type='submit']",
+          "input[type='submit']",
+          "[data-bind*='click']"
+        ],
+        "domain_field": [
+          "input[name='identitydomain']",
+          "input[placeholder*='domain' i]"
+        ],
+        "mfa_code": [
+          "input[name='otpCode']",
+          "input[placeholder*='verification' i]"
+        ],
+        "success_indicators": [
+          ".oj-applayout",
+          ".oj-web-applayout",
+          "[data-oj-binding-provider]"
+        ]
+      }
+    },
+    "workday": {
+      "login_url": "",
+      "app_name": "Workday",
+      "credentials": {
+        "username": "",
+        "password": "",
+        "tenant_url": ""
+      },
+      "selectors": {
+        "username": [
+          "input[data-automation-id='email']",
+          "input[type='email']",
+          "#email"
+        ],
+        "password": [
+          "input[data-automation-id='password']",
+          "input[type='password']",
+          "#password"
+        ],
+        "login_button": [
+          "button[data-automation-id='click_filter']",
+          "button[type='submit']",
+          "[aria-label*='Sign' i]"
+        ],
+        "mfa_code": [
+          "input[data-automation-id='verificationCode']",
+          "input[placeholder*='code' i]"
+        ],
+        "success_indicators": [
+          "[data-automation-id='landingPage']",
+          "[data-automation-id='workletContainer']",
+          ".wd-"
+        ]
+      }
+    }
+  },
+  "retry_settings": {
+    "max_retries": 3,
+    "retry_delay": 2000,
+    "element_timeout": 10000
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "helix_login_automation.log"
+  }
+}

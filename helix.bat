@@ -60,10 +60,6 @@ echo [5/5] Waiting for API startup (20 seconds)...
 timeout /t 20 /nobreak > nul
 
 echo.
-echo Installing Playwright browsers...
-docker-compose -f docker-compose.dev.yml exec --user root helix-api playwright install chromium 2>nul
-
-echo.
 echo ===============================================
 echo HELIX IS READY!
 echo ===============================================

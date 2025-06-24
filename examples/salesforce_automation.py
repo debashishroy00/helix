@@ -3,44 +3,59 @@
 Salesforce Automation Example
 =============================
 
-Shows how to use Helix for real Salesforce test automation.
+Shows how to use Helix with login automation for real Salesforce test automation.
 This example creates an Opportunity in Salesforce Lightning.
 """
 
 import asyncio
 import os
+import sys
 from playwright.async_api import async_playwright
 import requests
 import json
 from typing import Optional, Dict, Any
+from dotenv import load_dotenv
+
+# Add project root to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Import login automation module
+from src.login_automation import LoginHandler
+
+# Load environment variables
+load_dotenv()
 
 
 class HelixSalesforceAutomation:
-    """Salesforce automation using Helix for element identification."""
+    """Salesforce automation using Helix for element identification with login automation."""
     
     def __init__(self, helix_url: str = "http://localhost:8000"):
         self.helix_url = helix_url
+        
+        # Initialize login automation handler
+        config_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "src",
+            "login_automation", 
+            "config",
+            "login_config.json"
+        )
+        self.login_handler = LoginHandler(config_path)
         self.page = None
-        self.browser = None
-        self.context = None
         
     async def setup(self, headless: bool = False):
-        """Set up Playwright browser."""
-        self.playwright = await async_playwright().start()
-        self.browser = await self.playwright.chromium.launch(headless=headless)
-        self.context = await self.browser.new_context()
-        self.page = await self.context.new_page()
+        """Set up browser using login automation module."""
+        print("🌐 Setting up browser with login automation...")
+        await self.login_handler.setup_browser()
+        # Get reference to the browser page
+        self.page = self.login_handler.page
+        print("✅ Browser setup complete")
         
     async def teardown(self):
-        """Clean up browser resources."""
-        if self.page:
-            await self.page.close()
-        if self.context:
-            await self.context.close()
-        if self.browser:
-            await self.browser.close()
-        if self.playwright:
-            await self.playwright.stop()
+        """Clean up browser resources using login automation module."""
+        print("🧹 Cleaning up browser...")
+        await self.login_handler.teardown_browser()
+        print("✅ Browser cleanup complete")
     
     def find_element_with_helix(self, intent: str, page_type: str) -> Optional[str]:
         """Use Helix API to find element selector."""
@@ -184,24 +199,19 @@ async def main():
         print("❌ Cannot connect to Helix API. Start it with: helix.bat")
         return
     
-    # Get Salesforce credentials
-    sf_url = os.getenv("SALESFORCE_URL", "")
-    sf_username = os.getenv("SALESFORCE_USERNAME", "")
-    sf_password = os.getenv("SALESFORCE_PASSWORD", "")
+    # Get Salesforce credentials from environment
+    sf_username = os.getenv("SALESFORCE_USERNAME")
+    sf_password = os.getenv("SALESFORCE_PASSWORD") 
+    sf_org_url = os.getenv("SALESFORCE_ORG_URL")
     
-    if not sf_url:
-        print("\n📝 Enter your Salesforce Lightning URL:")
-        print("   Example: https://your-domain.lightning.force.com")
-        sf_url = input("URL: ").strip()
+    if not all([sf_username, sf_password]):
+        print("❌ Please set SALESFORCE_USERNAME and SALESFORCE_PASSWORD in .env file")
+        print("   Also set SALESFORCE_ORG_URL if using a custom domain")
+        return
     
-    if not sf_username:
-        print("\n📝 Enter your Salesforce username:")
-        sf_username = input("Username: ").strip()
-    
-    if not sf_password:
-        import getpass
-        print("\n📝 Enter your Salesforce password:")
-        sf_password = getpass.getpass("Password: ")
+    print(f"🔐 Using credentials from environment:")
+    print(f"   Username: {sf_username}")
+    print(f"   Org URL: {sf_org_url}")
     
     # Create automation instance
     automation = HelixSalesforceAutomation()
@@ -210,19 +220,28 @@ async def main():
         # Set up browser
         await automation.setup(headless=False)  # Set to True for headless
         
-        # Navigate to Salesforce
-        print(f"\n🌐 Navigating to {sf_url}...")
-        await automation.page.goto(sf_url)
+        # Login using login automation module
+        print("\n🔐 Logging in using login automation module...")
+        credentials = {
+            "username": sf_username,
+            "password": sf_password,
+            "org_url": sf_org_url
+        }
         
-        # Login if needed
-        if "login" in automation.page.url.lower():
-            print("\n🔐 Logging in...")
-            await automation.type_text("username field", sf_username, "login")
-            await automation.type_text("password field", sf_password, "login")
-            await automation.click_element("login button", "login")
+        success, message = await automation.login_handler.login_to_app("salesforce", credentials)
+        
+        if not success:
+            print(f"❌ Login failed: {message}")
+            return
             
-            # Wait for login
-            await automation.page.wait_for_timeout(5000)
+        print(f"✅ Login successful: {message}")
+        print(f"📍 Current URL: {automation.page.url}")
+        
+        # Verify login
+        verified, verify_message = await automation.login_handler.verify_login_success("salesforce")
+        if not verified:
+            print(f"⚠️  Login verification failed: {verify_message}")
+            return
         
         # Example: Create an opportunity
         await automation.create_opportunity(
