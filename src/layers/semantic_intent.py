@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
 
 from src.layers.base import BaseLayer
-from src.models.element import ElementStrategy, ElementContext, StrategyType
+from src.models.element import ElementStrategy, ElementContext, StrategyType, PerformanceTier
 
 
 @dataclass
@@ -374,6 +374,7 @@ class UniversalSemanticIntentLayer(BaseLayer):
                 strategy_type=self.layer_type,
                 selector=selector,
                 confidence=confidence,
+                performance_tier=PerformanceTier.INSTANT,
                 metadata={
                     "source": "cached_universal",
                     "purpose": cached_intent.purpose,
@@ -398,6 +399,7 @@ class UniversalSemanticIntentLayer(BaseLayer):
                 strategy_type=self.layer_type,
                 selector=selector,
                 confidence=confidence,
+                performance_tier=PerformanceTier.INSTANT,
                 metadata={
                     "source": "instant_universal",
                     "purpose": parsed_intent.purpose,
@@ -469,6 +471,7 @@ class UniversalSemanticIntentLayer(BaseLayer):
                 strategy_type=self.layer_type,
                 selector=selector,
                 confidence=confidence,
+                performance_tier=PerformanceTier.FAST,
                 metadata={
                     "source": "fast_universal",
                     "purpose": parsed_intent.purpose,
@@ -512,6 +515,7 @@ class UniversalSemanticIntentLayer(BaseLayer):
                     strategy_type=self.layer_type,
                     selector=selector,
                     confidence=0.7,
+                    performance_tier=PerformanceTier.MEDIUM,
                     metadata={
                         "source": "medium_universal",
                         "keyword": keyword,
@@ -542,6 +546,7 @@ class UniversalSemanticIntentLayer(BaseLayer):
                 strategy_type=self.layer_type,
                 selector=selector,
                 confidence=0.4,
+                performance_tier=PerformanceTier.FAST,
                 metadata={
                     "source": "fallback_universal",
                     "tier": "fallback",

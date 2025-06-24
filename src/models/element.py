@@ -35,12 +35,20 @@ class StrategyType(Enum):
     CONTEXTUAL_RELATIONSHIP = "contextual_relationship"  # Layer 2
     VISUAL_FINGERPRINT = "visual_fingerprint"  # Layer 3
     BEHAVIORAL_PATTERN = "behavioral_pattern"  # Layer 4
-    STRUCTURAL_PATTERN = "structural_pattern"  # Layer 5
-    ACCESSIBILITY_BRIDGE = "accessibility_bridge"  # Layer 6
+    STRUCTURAL_PATTERN = "structural_pattern"  # Layer 5 - NEW
+    ACCESSIBILITY_BRIDGE = "accessibility_bridge"  # Layer 6 - NEW
     MUTATION_OBSERVATION = "mutation_observation"  # Layer 7 - NEW
-    TIMING_SYNCHRONIZATION = "timing_synchronization"  # Layer 8 - NEW
-    STATE_CONTEXT_AWARENESS = "state_context_awareness"  # Layer 9 - NEW
-    ML_FUSION = "ml_fusion"  # Layer 10 - Enhanced
+    TIMING_SYNCHRONIZATION = "timing_synchronization"  # Layer 8
+    STATE_CONTEXT = "state_context"  # Layer 9
+    ML_CONFIDENCE_FUSION = "ml_confidence_fusion"  # Layer 10 - NEW
+
+
+class PerformanceTier(Enum):
+    """Performance tiers for strategy execution optimization"""
+    INSTANT = "instant"      # <10ms - Pre-compiled patterns
+    FAST = "fast"           # 10-50ms - Simple selectors
+    MEDIUM = "medium"       # 50-200ms - Context analysis  
+    EXPENSIVE = "expensive" # 200ms+ - Complex operations
 
 
 @dataclass
@@ -49,14 +57,18 @@ class ElementStrategy:
     Represents a single strategy for finding an element.
     Each layer produces one or more strategies with confidence scores.
     """
-    strategy_type: StrategyType
     selector: str  # CSS selector, XPath, or special format like "visual:click(x,y)"
     confidence: float  # 0.0 to 1.0
-    metadata: Dict[str, Any]  # Layer-specific data
+    strategy_type: StrategyType
+    performance_tier: PerformanceTier
+    reasoning: str = ""  # Human-readable explanation
+    metadata: Optional[Dict[str, Any]] = None  # Layer-specific data
     
     def __post_init__(self):
         if not 0 <= self.confidence <= 1:
             raise ValueError(f"Confidence must be between 0 and 1, got {self.confidence}")
+        if self.metadata is None:
+            self.metadata = {}
 
 
 @dataclass
@@ -65,11 +77,13 @@ class ElementContext:
     Context information needed for element identification.
     Provides hints to layers about the environment and intent.
     """
-    platform: Platform
-    page_type: str  # e.g., "login", "dashboard", "form"
     intent: str  # Natural language description of what we're looking for
+    platform: str  # Platform identifier (e.g., "salesforce_lightning")
+    url: str  # Current page URL
+    page_type: str  # e.g., "login", "dashboard", "form"
+    html_content: Optional[str] = None  # HTML content for analysis
     parent_frame: Optional[str] = None  # For iframe/shadow DOM contexts
-    additional_context: Dict[str, Any] = None  # Platform-specific context
+    additional_context: Optional[Dict[str, Any]] = None  # Platform-specific context
     
     def __post_init__(self):
         if self.additional_context is None:
