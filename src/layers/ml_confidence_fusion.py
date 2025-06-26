@@ -10,11 +10,18 @@ intelligently and adapts over time.
 
 import json
 import pickle
-import numpy as np
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from pathlib import Path
+
+# Optional dependency
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    np = None
 
 from src.models.element import ElementStrategy, ElementContext, StrategyType, PerformanceTier
 from src.layers.base import BaseLayer

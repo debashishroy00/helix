@@ -10,9 +10,9 @@ rather than semantic meaning or visual appearance.
 
 import re
 from typing import List, Optional, Any, Dict
-from bs4 import BeautifulSoup, Tag
 from src.models.element import ElementStrategy, ElementContext, StrategyType, PerformanceTier
 from src.layers.base import BaseLayer
+from src.utils.robust_html_parser import parse_html
 
 
 class StructuralPatternLayer(BaseLayer):
@@ -92,7 +92,7 @@ class StructuralPatternLayer(BaseLayer):
         if not html_content:
             return strategies
         
-        soup = BeautifulSoup(html_content, 'html.parser')
+        soup = parse_html(html_content)
         
         # Strategy 1: Hierarchical positioning
         hierarchical_strategies = self._generate_hierarchical_strategies(soup, context)
@@ -118,13 +118,13 @@ class StructuralPatternLayer(BaseLayer):
     
     def _generate_hierarchical_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on DOM hierarchy patterns."""
         
         strategies = []
-        intent_lower = context.intent.lower()
+        intent_lower = context.intent.lower() if context.intent and isinstance(context.intent, str) else ""
         platform = context.platform
         
         # Platform-specific hierarchy patterns
@@ -210,7 +210,7 @@ class StructuralPatternLayer(BaseLayer):
     
     def _generate_css_pattern_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on CSS class patterns."""
@@ -283,7 +283,7 @@ class StructuralPatternLayer(BaseLayer):
     
     def _generate_container_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on container context."""
@@ -342,7 +342,7 @@ class StructuralPatternLayer(BaseLayer):
     
     def _generate_sibling_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on sibling relationships."""
@@ -409,7 +409,7 @@ class StructuralPatternLayer(BaseLayer):
     
     def _generate_index_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on element index positioning."""
@@ -474,7 +474,7 @@ class StructuralPatternLayer(BaseLayer):
         
         return strategies
     
-    def _get_element_selector(self, element: Tag) -> str:
+    def _get_element_selector(self, element: Any) -> str:
         """Generate a CSS selector for a given element."""
         
         selectors = []
@@ -498,7 +498,7 @@ class StructuralPatternLayer(BaseLayer):
         
         return selectors[0] if selectors else element.name
     
-    def _get_simple_selector(self, element: Tag) -> str:
+    def _get_simple_selector(self, element: Any) -> str:
         """Generate a simple CSS selector for an element."""
         
         if element.get('id'):

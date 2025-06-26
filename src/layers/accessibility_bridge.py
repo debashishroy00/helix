@@ -10,9 +10,9 @@ are specifically designed to identify elements semantically and remain stable.
 
 import re
 from typing import List, Optional, Any, Dict
-from bs4 import BeautifulSoup, Tag
 from src.models.element import ElementStrategy, ElementContext, StrategyType, PerformanceTier
 from src.layers.base import BaseLayer
+from src.utils.robust_html_parser import parse_html
 
 
 class AccessibilityBridgeLayer(BaseLayer):
@@ -140,7 +140,7 @@ class AccessibilityBridgeLayer(BaseLayer):
         if not html_content:
             return strategies
         
-        soup = BeautifulSoup(html_content, 'html.parser')
+        soup = parse_html(html_content)
         
         # Strategy 1: ARIA role-based selection
         role_strategies = self._generate_aria_role_strategies(soup, context)
@@ -170,13 +170,13 @@ class AccessibilityBridgeLayer(BaseLayer):
     
     def _generate_aria_role_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on ARIA roles."""
         
         strategies = []
-        intent_lower = context.intent.lower()
+        intent_lower = context.intent.lower() if context.intent and isinstance(context.intent, str) else ""
         
         # Find the most relevant ARIA role for the intent
         relevant_roles = []
@@ -259,7 +259,7 @@ class AccessibilityBridgeLayer(BaseLayer):
     
     def _generate_aria_label_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on ARIA labels."""
@@ -316,7 +316,7 @@ class AccessibilityBridgeLayer(BaseLayer):
     
     def _generate_aria_description_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on ARIA descriptions."""
@@ -357,7 +357,7 @@ class AccessibilityBridgeLayer(BaseLayer):
     
     def _generate_landmark_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on ARIA landmarks."""
@@ -444,7 +444,7 @@ class AccessibilityBridgeLayer(BaseLayer):
     
     def _generate_form_accessibility_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on form accessibility patterns."""
@@ -527,7 +527,7 @@ class AccessibilityBridgeLayer(BaseLayer):
     
     def _generate_screen_reader_strategies(
         self, 
-        soup: BeautifulSoup, 
+        soup: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate strategies based on screen reader patterns."""
@@ -608,7 +608,7 @@ class AccessibilityBridgeLayer(BaseLayer):
         
         return strategies
     
-    def _generate_element_selector(self, element: Tag) -> str:
+    def _generate_element_selector(self, element: Any) -> str:
         """Generate a CSS selector for a given element."""
         
         # Use ID if available

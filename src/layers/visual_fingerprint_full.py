@@ -85,7 +85,7 @@ class VisualFingerprintLayer(BaseLayer):
             strategies.append(ElementStrategy(
                 selector="/* Visual fingerprinting unavailable - missing cv2/PIL */",
                 confidence=0.1,
-                strategy_type=self.layer_type,
+                strategy_type=self.strategy_type,
                 performance_tier="expensive",
                 reasoning="Visual dependencies not installed"
             ))
@@ -110,7 +110,7 @@ class VisualFingerprintLayer(BaseLayer):
             strategies.extend(shape_strategies)
             
             # Strategy 3: Color-based detection (platform-specific)
-            if context.platform.value if hasattr(context.platform, 'value') else str(context.platform) in self.platform_colors:
+            if context.platform.value in self.platform_colors:
                 color_strategies = await self._color_based_strategies(cv_image, context)
                 strategies.extend(color_strategies)
             
@@ -141,8 +141,8 @@ class VisualFingerprintLayer(BaseLayer):
     
     async def _ocr_strategies(
         self, 
-        pil_image: Any,
-        cv_image: Any,
+        pil_image: Image.Image,
+        cv_image: np.ndarray,
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Use OCR to find text matching the intent."""
@@ -218,7 +218,7 @@ class VisualFingerprintLayer(BaseLayer):
     
     async def _shape_detection_strategies(
         self,
-        cv_image: Any,
+        cv_image: np.ndarray,
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Detect UI elements by their shapes."""
@@ -275,7 +275,7 @@ class VisualFingerprintLayer(BaseLayer):
     
     async def _color_based_strategies(
         self,
-        cv_image: Any,
+        cv_image: np.ndarray,
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Detect elements by platform-specific colors."""
@@ -327,7 +327,7 @@ class VisualFingerprintLayer(BaseLayer):
     
     async def _template_matching_strategies(
         self,
-        cv_image: Any,
+        cv_image: np.ndarray,
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Match against known UI pattern templates."""

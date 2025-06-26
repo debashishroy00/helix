@@ -11,10 +11,10 @@ Patent-critical: This is Layer 2 of the 10-layer system.
 import asyncio
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
-from playwright.async_api import Page, ElementHandle
 
 from ..models.element import ElementStrategy, ElementContext, StrategyType
 from .base import BaseLayer
+from ..utils.robust_html_parser import parse_html
 
 
 @dataclass
@@ -40,7 +40,7 @@ class ContextualRelationshipLayer(BaseLayer):
     
     async def generate_strategies(
         self, 
-        page: Page, 
+        page: Any, 
         context: ElementContext
     ) -> List[ElementStrategy]:
         """Generate relationship-based strategies."""
@@ -126,6 +126,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=selector,
                     confidence=0.99,  # Maximum confidence for deterministic login patterns
+                    performance_tier="fast",
                     metadata={
                         "relationship_type": "login_form",
                         "field_type": "username",
@@ -141,6 +142,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=selector,
                     confidence=0.99,
+                    performance_tier="fast",
                     metadata={
                         "relationship_type": "login_form",
                         "field_type": "password",
@@ -156,6 +158,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=selector,
                     confidence=0.99,
+                    performance_tier="fast",
                     metadata={
                         "relationship_type": "login_form",
                         "field_type": "button",
@@ -183,6 +186,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=xpath,
                     confidence=0.85,
+                    performance_tier="medium",
                     metadata={
                         "relationship_type": "label_input",
                         "label_text": label_text,
@@ -203,6 +207,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=xpath,
                     confidence=0.80,
+                    performance_tier="medium",
                     metadata={
                         "relationship_type": "button_in_section",
                         "section": section_name,
@@ -230,6 +235,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=xpath,
                     confidence=0.75,
+                    performance_tier="medium",
                     metadata={
                         "relationship_type": "following_sibling",
                         "reference": reference_text
@@ -242,6 +248,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=xpath,
                     confidence=0.70,
+                    performance_tier="medium",
                     metadata={
                         "relationship_type": "preceding_sibling",
                         "reference": reference_text
@@ -266,6 +273,7 @@ class ContextualRelationshipLayer(BaseLayer):
                 strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                 selector=css,
                 confidence=0.70,
+                performance_tier="fast",
                 metadata={
                     "relationship_type": "proximity",
                     "container": "action_bar",
@@ -282,6 +290,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=css,
                     confidence=0.75,
+                    performance_tier="fast",
                     metadata={
                         "relationship_type": "proximity",
                         "container": "field_container",
@@ -308,6 +317,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=xpath,
                     confidence=0.85,
+                    performance_tier="medium",
                     metadata={
                         "relationship_type": "container",
                         "container_type": "modal",
@@ -326,6 +336,7 @@ class ContextualRelationshipLayer(BaseLayer):
                     strategy_type=StrategyType.CONTEXTUAL_RELATIONSHIP,
                     selector=xpath,
                     confidence=0.80,
+                    performance_tier="expensive",
                     metadata={
                         "relationship_type": "table_cell",
                         "column": column_name,

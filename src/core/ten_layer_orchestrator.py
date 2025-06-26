@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from src.models.element import ElementStrategy, ElementContext, ElementResult, StrategyType, PerformanceTier
 from src.layers.base import BaseLayer, AsyncLayerExecutor
 
-# Import all 10 layers
+# Import all 10 layers + specialized handlers
 from src.layers.semantic_intent import UniversalSemanticIntentLayer
 from src.layers.contextual_relationship import ContextualRelationshipLayer
 from src.layers.visual_fingerprint import VisualFingerprintLayer
@@ -25,6 +25,12 @@ from src.layers.mutation_observation import MutationObservationLayer
 from src.layers.timing_synchronization import TimingSynchronizationLayer
 from src.layers.state_context import StateContextLayer
 from src.layers.ml_confidence_fusion import MLConfidenceFusionLayer
+
+# Import specialized edge case handlers
+from src.layers.shadow_dom_handler import ShadowDOMHandler
+from src.layers.canvas_handler import CanvasHandler
+from src.layers.virtual_scroll_handler import VirtualScrollHandler
+from src.layers.icon_recognition_layer import IconRecognitionLayer
 
 
 @dataclass
@@ -77,42 +83,40 @@ class TenLayerOrchestrator:
         }
     
     def _initialize_all_layers(self) -> Dict[StrategyType, BaseLayer]:
-        """Initialize all 10 layers of the system."""
+        """Initialize all 10 layers plus specialized edge case handlers."""
         
         layers = {}
         
         try:
-            # Layer 1: Semantic Intent Recognition
+            # Core 10 layers
             layers[StrategyType.SEMANTIC_INTENT] = UniversalSemanticIntentLayer()
-            
-            # Layer 2: Contextual Relationship Mapping
             layers[StrategyType.CONTEXTUAL_RELATIONSHIP] = ContextualRelationshipLayer()
-            
-            # Layer 3: Visual Fingerprinting
             layers[StrategyType.VISUAL_FINGERPRINT] = VisualFingerprintLayer()
-            
-            # Layer 4: Behavioral Pattern Recognition
             layers[StrategyType.BEHAVIORAL_PATTERN] = BehavioralPatternLayer()
-            
-            # Layer 5: Structural Pattern Analysis
             layers[StrategyType.STRUCTURAL_PATTERN] = StructuralPatternLayer()
-            
-            # Layer 6: Accessibility Bridge
             layers[StrategyType.ACCESSIBILITY_BRIDGE] = AccessibilityBridgeLayer()
-            
-            # Layer 7: Mutation Observation
             layers[StrategyType.MUTATION_OBSERVATION] = MutationObservationLayer()
-            
-            # Layer 8: Timing Synchronization
             layers[StrategyType.TIMING_SYNCHRONIZATION] = TimingSynchronizationLayer()
-            
-            # Layer 9: State Context Awareness
             layers[StrategyType.STATE_CONTEXT] = StateContextLayer()
             
             print(f"✅ Successfully initialized {len(layers)}/9 core layers")
             
         except Exception as e:
             print(f"⚠️ Error initializing some layers: {e}")
+        
+        # Initialize specialized edge case handlers
+        try:
+            self.edge_case_handlers = {
+                "shadow_dom": ShadowDOMHandler(),
+                "canvas": CanvasHandler(), 
+                "virtual_scroll": VirtualScrollHandler(),
+                "icon_recognition": IconRecognitionLayer()
+            }
+            print(f"✅ Successfully initialized {len(self.edge_case_handlers)} edge case handlers")
+            
+        except Exception as e:
+            print(f"⚠️ Error initializing edge case handlers: {e}")
+            self.edge_case_handlers = {}
         
         return layers
     
@@ -136,6 +140,10 @@ class TenLayerOrchestrator:
         print(f"🔄 Executing {len(self.layers)} layers for intent: '{context.intent}'")
         
         layer_strategies = await self._execute_core_layers(page, context, stats)
+        
+        # Step 1.5: Execute edge case handlers if needed
+        edge_strategies = await self._execute_edge_case_handlers(page, context, stats)
+        layer_strategies.extend(edge_strategies)
         
         # Step 2: Apply ML Confidence Fusion (Layer 10)
         fusion_start = time.time()
@@ -199,6 +207,68 @@ class TenLayerOrchestrator:
             
         except Exception as e:
             print(f"❌ Error executing core layers: {e}")
+            return []
+    
+    async def _execute_edge_case_handlers(
+        self,
+        page: Any,
+        context: ElementContext,
+        stats: OrchestrationStats
+    ) -> List[ElementStrategy]:
+        """Execute specialized edge case handlers when needed."""
+        
+        if not hasattr(self, 'edge_case_handlers'):
+            return []
+        
+        edge_strategies = []
+        intent_lower = context.intent.lower()
+        html_content = context.html_content or ""
+        
+        try:
+            # Detect if we need specialized handlers
+            handlers_to_run = []
+            
+            # Shadow DOM detection
+            if ("lightning" in context.platform or 
+                "shadow" in html_content or 
+                "web-component" in html_content or
+                any(tag in html_content for tag in ["lightning-", "force-", "vaadin-"])):
+                handlers_to_run.append("shadow_dom")
+            
+            # Canvas detection
+            if ("canvas" in intent_lower or 
+                "signature" in intent_lower or 
+                "chart" in intent_lower or
+                "<canvas" in html_content):
+                handlers_to_run.append("canvas")
+            
+            # Virtual scroll detection
+            if ("table" in intent_lower or 
+                "row" in intent_lower or
+                "virtual" in html_content or
+                "infinite-scroll" in html_content or
+                any(lib in html_content for lib in ["ag-grid", "react-window", "ReactVirtualized"])):
+                handlers_to_run.append("virtual_scroll")
+            
+            # Icon recognition detection
+            if (not any(word in intent_lower for word in ["field", "input", "text"]) and
+                any(word in intent_lower for word in ["button", "save", "edit", "delete", "close"]) and
+                ("icon" in html_content or "fa-" in html_content or "material-icons" in html_content)):
+                handlers_to_run.append("icon_recognition")
+            
+            # Execute needed handlers
+            for handler_name in handlers_to_run:
+                if handler_name in self.edge_case_handlers:
+                    handler = self.edge_case_handlers[handler_name]
+                    handler_strategies = await handler.generate_strategies(page, context)
+                    edge_strategies.extend(handler_strategies)
+                    
+                    print(f"🔧 Edge case handler '{handler_name}': {len(handler_strategies)} strategies")
+            
+            return edge_strategies
+            
+        except Exception as e:
+            print(f"❌ Error in edge case handlers: {e}")
             return []
     
     def _limit_strategies_per_layer(

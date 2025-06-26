@@ -208,7 +208,7 @@ class StateContextLayer(BaseLayer):
             user_context=UserContext()
         )
         
-        platform = context.platform.value
+        platform = context.platform.value if hasattr(context.platform, 'value') else str(context.platform)
         if platform not in self.state_patterns:
             return state_info  # Return default state
         

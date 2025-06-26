@@ -13,7 +13,7 @@ from typing import List, Dict, Any, Optional, Set
 from dataclasses import dataclass
 from playwright.async_api import Page, ElementHandle
 
-from ..models.element import ElementStrategy, ElementContext, StrategyType
+from ..models.element import ElementStrategy, ElementContext, StrategyType, PerformanceTier
 from .base import BaseLayer
 
 
@@ -173,6 +173,7 @@ class BehavioralPatternLayer(BaseLayer):
                 strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                 selector="button:hover, button[class*='hover'], button[class*='active']",
                 confidence=0.65,
+                performance_tier=PerformanceTier.MEDIUM,
                 metadata={
                     "behavior": "hover_state",
                     "pattern": "button_with_hover",
@@ -185,6 +186,7 @@ class BehavioralPatternLayer(BaseLayer):
                 strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                 selector="[style*='cursor: pointer'], [style*='cursor:pointer']",
                 confidence=0.60,
+                performance_tier=PerformanceTier.FAST,
                 metadata={
                     "behavior": "clickable",
                     "pattern": "cursor_pointer",
@@ -198,6 +200,7 @@ class BehavioralPatternLayer(BaseLayer):
                 strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                 selector="input:focus, input[class*='focus'], textarea:focus, select:focus",
                 confidence=0.65,
+                performance_tier=PerformanceTier.MEDIUM,
                 metadata={
                     "behavior": "focusable",
                     "pattern": "input_with_focus",
@@ -226,6 +229,7 @@ class BehavioralPatternLayer(BaseLayer):
                     strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                     selector=selector,
                     confidence=0.70,
+                    performance_tier=PerformanceTier.FAST,
                     metadata={
                         "behavior": "hover",
                         "trigger": "mouseover",
@@ -248,6 +252,7 @@ class BehavioralPatternLayer(BaseLayer):
                     strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                     selector=button_pattern['selector'],
                     confidence=0.75,
+                    performance_tier=PerformanceTier.EXPENSIVE,
                     metadata={
                         "behavior": "hover",
                         "trigger": "mouseover",
@@ -274,6 +279,7 @@ class BehavioralPatternLayer(BaseLayer):
                 strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                 selector=selector,
                 confidence=0.70,
+                performance_tier=PerformanceTier.FAST,
                 metadata={
                     "behavior": "click",
                     "trigger": "click",
@@ -288,6 +294,7 @@ class BehavioralPatternLayer(BaseLayer):
                     strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                     selector=ripple_pattern['selector'],
                     confidence=0.65,
+                    performance_tier=PerformanceTier.FAST,
                     metadata={
                         "behavior": "click",
                         "trigger": "click",
@@ -316,6 +323,7 @@ class BehavioralPatternLayer(BaseLayer):
                     strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                     selector=selector,
                     confidence=0.70,
+                    performance_tier=PerformanceTier.FAST,
                     metadata={
                         "behavior": "focus",
                         "trigger": "focus",
@@ -329,6 +337,7 @@ class BehavioralPatternLayer(BaseLayer):
                     strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                     selector=focus_pattern['selector'],
                     confidence=0.65,
+                    performance_tier=PerformanceTier.FAST,
                     metadata={
                         "behavior": "focus",
                         "trigger": "focus",
@@ -354,6 +363,7 @@ class BehavioralPatternLayer(BaseLayer):
                 strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                 selector=selector,
                 confidence=0.60,
+                performance_tier=PerformanceTier.MEDIUM,
                 metadata={
                     "behavior": "animated",
                     "pattern": "has_transition",
@@ -368,6 +378,7 @@ class BehavioralPatternLayer(BaseLayer):
                 strategy_type=StrategyType.BEHAVIORAL_PATTERN,
                 selector=selector,
                 confidence=0.65,
+                performance_tier=PerformanceTier.MEDIUM,
                 metadata={
                     "behavior": "animated",
                     "pattern": "transform_on_interaction",

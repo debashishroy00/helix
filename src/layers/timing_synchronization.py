@@ -154,7 +154,7 @@ class TimingSynchronizationLayer(BaseLayer):
         context: ElementContext
     ) -> LoadingPattern:
         """Analyze how elements load on this page."""
-        platform = context.platform.value
+        platform = context.platform.value if hasattr(context.platform, 'value') else str(context.platform)
         
         # Get platform-specific pattern
         if platform in self.platform_patterns:
