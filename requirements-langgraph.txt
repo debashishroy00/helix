@@ -1,0 +1,44 @@
+# LangGraph Core Dependencies
+langgraph>=0.2.0
+langchain-core>=0.1.0
+langsmith>=0.1.0
+
+# Agent-specific Dependencies
+# Agent 1: Parser
+pandas>=2.0.0
+python-docx>=0.8.11
+openpyxl>=3.1.0
+PyPDF2>=3.0.0
+beautifulsoup4>=4.12.0
+
+# Agent 2: Intent Extractor
+transformers>=4.35.0
+sentence-transformers>=2.2.0
+spacy>=3.7.0
+torch>=2.0.0
+
+# Agent 3: Platform Detector
+scikit-learn>=1.3.0
+
+# State Management & Persistence
+redis>=5.0.0
+sqlalchemy>=2.0.0
+
+# Monitoring & Observability  
+prometheus-client>=0.19.0
+opentelemetry-api>=1.21.0
+opentelemetry-sdk>=1.21.0
+
+# Async Support
+httpx>=0.25.0
+aiofiles>=23.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# Development Tools
+black>=23.0.0
+ruff>=0.1.0
+mypy>=1.7.0
